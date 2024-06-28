@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <title>Number guessing game</title>
+  <style>
+    html {
+      font-family: sans-serif;
+    }
+    body {
+      width: 50%;
+      max-width: 800px;
+      min-width: 480px;
+      margin: 0 auto;
+    }
+    .form input[type="number"] {
+      width: 200px;
+    }
+    .lastResult {
+      color: white;
+      padding: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Number guessing game</h1>
+  <p>We have selected a random number between 1 and 100. See if you can guess it in 10 turns or fewer. We'll tell you if your guess was too high or too low.</p>
+  <div class="form">
+    <label for="guessField">Enter a guess: </label>
+    <input type="number" min="1" max="100" required id="guessField" class="guessField">
+    <input type="submit" value="Submit guess" class="guessSubmit">
+	<button onclick="resetGame()">Do it again</button>
+  </div>
+  <div class="resultParas">
+    <p class="guesses" id="guesses"></p>
+    <p class="lastResult"></p>
+    <p class="lowOrHi"></p>
+  </div>
+  <script>
+    var num = Math.round(Math.random() * 100);//随机生成100的随机数
+    console.log(num);
+    var loop = 1;//记录轮数
+    var nums = [];//记录输入的数字
+    var btn = document.querySelector(".guessSubmit");//点击确定时候，把数字存储到btn中
+    btn.addEventListener("click", clickBtn);
+	//定义的resetGame的按钮
+	  function resetGame() {
+	      num = Math.round(Math.random() * 100);
+	      loop = 1;
+	      nums = [];
+	      document.querySelector('#guesses').innerHTML = "";
+	      document.querySelector('.lastResult').innerHTML = "";
+	      document.querySelector('.lastResult').style.backgroundColor = "initial";
+	      document.querySelector('#guessField').value = "";
+	    }
+
+	//记录每次的数
+    function clickBtn(){
+		//获取用户输入
+      var current_num = parseInt(document.querySelector("#guessField").value);
+      console.log(current_num);//控制台上打印变量current_num,便于调试
+	  //if语句复查他是否正确
+      if (current_num === num){
+        renderResult('你猜对了，正确！');
+        document.querySelector('.lastResult').style.backgroundColor = 'green';
+      } else {
+        if (current_num > num) {
+          renderResult("你猜错了，答案比你小");
+          document.querySelector('.lastResult').style.backgroundColor = 'red';
+        } else {
+          renderResult("你猜错了，答案比你大");
+          document.querySelector('.lastResult').style.backgroundColor = 'red';
+        }
+      }
+	  //记录用户输入过的数据
+      console.log("用户这次的输入是" + current_num);
+      nums.push(current_num);
+      console.log("用户的历史猜测" + nums);
+	  //历史猜测数据，放到网页中
+      document.querySelector('#guesses').innerHTML = nums.join(', ');
+    }
+    function renderResult(content){
+      var ele = document.querySelector('.lastResult');
+      console.log(document.querySelector('.lastResult'));
+      ele.innerHTML = content;//显示最后一次猜测的结果
+    }
+  </script>
+</body>
+</html>
