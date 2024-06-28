@@ -40,7 +40,7 @@
         // 拿到text里面的值
         var sourceUser = document.querySelector(".text1").value || '张光蛋';
 
-        var joke = `今天气温 ${ Math.random() * 30 } 摄氏度，${targetUser}出门散步。当走到${place}门前时，突然就${action}。人们都惊呆了，${sourceUser}全程目睹但并没有慌，因为${targetUser}是一个 140 公斤的胖子，天气又辣么热。`;
+        var joke = `今天气温 ${Math.floor(Math.random() * 30)} 摄氏度，${targetUser}出门散步。当走到${place}门前时，突然就${action}。人们都惊呆了，${sourceUser}全程目睹但并没有慌，因为${targetUser}是一个 140 公斤的胖子，天气又辣么热。`;
         // 测试一下生成的结果
         console.log(joke);
         return joke;
