@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>计算器</title>
+  <style>
+  tr {
+	background-color: #DDD;
+}
+td {
+	width: 40px;
+	height: 28px;
+}
+
+button {
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	border: none;
+	background-color: transparent;
+}
+
+.right-align {
+	text-align: right;
+}
+</style>
+</head>
+<body>
+<h1 style="text-align: left;">计算器</h1>
+<table width="200" align="left">
+  <tr>
+    <td colspan="5" align="right"><p id="int">0</p></td>
+  </tr>
+  <tr align="left" valign="middle">
+    <td><button onclick="addToDisplay('NEW')" value="NEW">随机计算公式</button></td>
+    <td><button onclick="clearDisplay()" value="CE">CE</button></td>
+    <td><button onclick="clearAll()" value="C">C</button></td>
+    <td><button onclick="addToDisplay('%')" value="%">%</button></td>
+    <td><button onclick="addToDisplay('/')" value="/">/</button></td>
+  </tr>
+  <tr align="left" valign="middle">
+    <td><button onclick="addToDisplay('**3')" value="X³">X³</button></td>
+    <td><button onclick="addToDisplay('7')" value="7">7</button></td>
+    <td><button onclick="addToDisplay('8')" value="8">8</button></td>
+    <td><button onclick="addToDisplay('9')" value="9">9</button></td>
+    <td><button onclick="addToDisplay('*')" value="*">*</button></td>
+  </tr>
+  <tr align="left" valign="middle">
+    <td><button onclick="addToDisplay('**2')" value="X²">X²</button></td>
+    <td><button onclick="addToDisplay('4')" value="4">4</button></td>
+    <td><button onclick="addToDisplay('5')" value="5">5</button></td>
+    <td><button onclick="addToDisplay('6')" value="6">6</button></td>
+    <td><button onclick="addToDisplay('-')" value="-">-</button></td>
+  </tr>
+  <tr align="left" valign="middle">
+    <td><button onclick="changeSign()" value="±">±</button></td>
+    <td><button onclick="addToDisplay('1')" value="1">1</button></td>
+    <td><button onclick="addToDisplay('2')" value="2">2</button></td>
+    <td><button onclick="addToDisplay('3')" value="3">3</button></td>
+    <td><button onclick="addToDisplay('+')" value="+">+</button></td>
+  </tr>
+  <tr align="left" valign="middle">
+    <td><button onclick="addToDisplay('(')" value="(">(</button></td>
+    <td><button onclick="addToDisplay(')')" value=")">)</button></td>
+    <td><button onclick="addToDisplay('0')" value="0">0</button></td>
+    <td><button onclick="addToDisplay('.')" value=".">.</button></td>
+    <td><button onclick="calculate()" value="=">=</button></td>
+  </tr>
+</table>
+<script>
+
+var isResultShown = false; // 标记是否显示了计算结果
+
+var isResultShown = false; // 标记是否显示了计算结果
+
+function addToDisplay(value) {
+  var display = document.getElementById('int');
+  var currentValue = display.textContent.trim();
+  
+  if (isResultShown && !isNaN(value)) {
+    display.textContent = '';
+    isResultShown = false;
+  } else if (isResultShown && isNaN(value)) {
+    isResultShown = false;
+  }
+
+  var isSymbol = ['+', '-', '*', '/'].includes(value);
+  var lastChar = currentValue[currentValue.length - 1];
+  var lastIsSymbol = ['+', '-', '*', '/'].includes(lastChar);
+
+  if (isSymbol && lastIsSymbol) {
+    return;
+  }
+  
+  if (value === '.' && currentValue.includes('.')) {
+    return;
+  }
+
+  if (value === 'NEW') {
+    var symbols = ['+', '-', '*', '/'];
+    var maxNumber = 1000; // 最大的随机数范围
+    var expression = '';
+
+    for (var i = 0; i < 5; i++) {
+      if (i > 0) {
+        expression += symbols[Math.floor(Math.random() * symbols.length)];
+      }
+      expression += Math.floor(Math.random() * maxNumber);
+    }
+
+    display.textContent = expression;
+  } else if (currentValue === '0' && value !== '.' && value !== '(' && !isSymbol) {
+
+    display.textContent = value;
+  } else {
+    if (!isResultShown || isNaN(value)) {
+      display.textContent += value;
+    } else {
+      display.textContent = value; // 替换内容改为追加
+      isResultShown = false;
+    }
+  }
+}
+
+
+function clearDisplay() {
+  document.getElementById('int').textContent = '0';
+}
+
+function clearAll() {
+  var display = document.getElementById('int');
+  var currentValue = display.textContent.trim();
+
+  if (currentValue.length > 0) {
+    display.textContent = currentValue.slice(0, -1);
+  }
+
+  if (display.textContent === '') {
+    display.textContent = '0';
+  }
+  isResultShown = false;
+}
+
+function changeSign() {
+  var display = document.getElementById('int');
+  var currentValue = parseFloat(display.textContent);
+  if (currentValue !== 0) {
+    display.textContent = -currentValue;
+  }
+}
+
+function calculate() {
+  var display = document.getElementById('int');
+  var expression = display.textContent;
+
+  expression = expression.replace(/%/g, '*0.01');
+
+  try {
+    var result = eval(expression);
+    display.textContent = result;
+    isResultShown = true; // 设置计算结果已显示的标志
+  } catch (error) {
+    display.textContent = 'Error';
+  }
+}
+  </script>
+</body>
+</html>
