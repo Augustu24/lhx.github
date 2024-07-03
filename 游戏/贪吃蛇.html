@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>贪吃蛇小游戏</title>
+<style>
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+#gameContainer {
+  display: flex;
+}
+
+canvas {
+  border: 1px solid black;
+}
+
+#scoreBoard {
+  margin-left: 20px;
+}
+
+#gameRules {
+  width: 200px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+}
+</style>
+</head>
+<body>
+<div id="gameContainer">
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <div id="scoreBoard">
+    <div id="score">分数: 0</div>
+    <div id="highScore">最高分: 0</div>
+  </div>
+  <div id="gameRules">
+    <h3>游戏规则</h3>
+    <p>使用WASD键控制贪吃蛇移动。</p>
+    <p>吃掉一个方块得一分。</p>
+    <p>撞墙或撞到自己会导致游戏结束。</p>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const blockSize = 20; // 方块大小
+let snake = [{x: 10, y: 10}]; // 贪吃蛇初始位置
+let food = {x: 15, y: 15}; // 食物初始位置
+let dx = 0; // 贪吃蛇在x轴上的移动方向
+let dy = 0; // 贪吃蛇在y轴上的移动方向
+let score = 0; // 当前分数
+let highScore = 0; // 最高分
+let gameOver = false; // 游戏结束标志
+
+// 绘制单个方块
+function drawBlock(pos) {
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(pos.x * blockSize, pos.y * blockSize, blockSize, blockSize);
+}
+
+// 绘制贪吃蛇
+function drawSnake() {
+  snake.forEach(block => drawBlock(block));
+}
+
+// 绘制食物
+function drawFood() {
+  drawBlock(food);
+}
+
+// 移动贪吃蛇
+function moveSnake() {
+  if (gameOver) return;
+
+  const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+  // 检测贪吃蛇是否撞墙
+  if (head.x < 0 || head.x >= canvas.width / blockSize || head.y < 0 || head.y >= canvas.height / blockSize) {
+    endGame();
+    return;
+  }
+
+  // 检测贪吃蛇是否撞到自己
+  for (let i = 1; i < snake.length; i++) {
+    if (head.x === snake[i].x && head.y === snake[i].y) {
+      endGame();
+      return;
+    }
+  }
+
+  snake.unshift(head);
+
+  // 如果贪吃蛇吃到食物
+  if (head.x === food.x && head.y === food.y) {
+    score++;
+    document.getElementById("score").innerText = `分数: ${score}`;
+    if (score > highScore) {
+      highScore = score;
+      document.getElementById("highScore").innerText = `最高分: ${highScore}`;
+    }
+    generateFood();
+  } else {
+    snake.pop();
+  }
+}
+
+// 生成新的食物位置
+function generateFood() {
+  food.x = Math.floor(Math.random() * (canvas.width / blockSize));
+  food.y = Math.floor(Math.random() * (canvas.height / blockSize));
+}
+
+// 结束游戏
+function endGame() {
+  gameOver = true;
+  alert(`游戏结束! 得分: ${score}`);
+  resetGame();
+}
+
+// 重置游戏状态
+function resetGame() {
+  snake = [{x: 10, y: 10}];
+  food = {x: 15, y: 15};
+  dx = 0;
+  dy = 0;
+  score = 0;
+  gameOver = false;
+  document.getElementById("score").innerText = `分数: ${score}`;
+}
+
+// 游戏循环
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  moveSnake();
+  drawSnake();
+  drawFood();
+  
+  if (!gameOver) {
+    setTimeout(() => {
+      requestAnimationFrame(gameLoop);
+    }, 100);
+  }
+}
+
+// 监听键盘事件控制贪吃蛇移动方向
+document.addEventListener("keydown", event => {
+  if (event.repeat) {
+    return;
+  }
+  
+  switch(event.key) {
+    case "w":
+      if (dy !== 1) { // 防止直接相反方向移动
+        dx = 0; dy = -1;
+      }
+      break;
+    case "a":
+      if (dx !== 1) {
+        dx = -1; dy = 0;
+      }
+      break;
+    case "s":
+      if (dy !== -1) {
+        dx = 0; dy = 1;
+      }
+      break;
+    case "d":
+      if (dx !== -1) {
+        dx = 1; dy = 0;
+      }
+      break;
+  }
+});
+
+// 启动游戏循环
+gameLoop();
+</script>
+</body>
+</html>

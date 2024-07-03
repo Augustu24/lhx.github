@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>小恐龙跳跃游戏</title>
+    <style>
+        body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 600px; /* 游戏容器宽度 */
+            height: 200px; /* 游戏容器高度 */
+            margin: 0 auto; /* 水平居中 */
+            background-color: #f9f9f9;
+            overflow: hidden;
+        }
+        
+        #dino {
+            position: absolute;
+            bottom: 0; /* 小恐龙初始位置底部 */
+            left: 50px; /* 小恐龙初始位置左侧 */
+            width: 60px; /* 小恐龙宽度 */
+            height: 80px; /* 小恐龙高度 */
+            background-image: url('images/小恐龙.jpg!qt420_jpg'); 
+            background-size: cover; 
+            transition: bottom 0.4s; /* 小恐龙跳跃动画过渡时间 */
+        }
+        
+        .obstacle {
+            position: absolute;
+            bottom: 0; /* 障碍物初始位置底部 */
+            width: 30px; /* 障碍物宽度 */
+            height: 30px; /* 障碍物高度 */
+            background-image: url('images/树桩.png'); 
+            background-size: cover; 
+            animation: moveObstacle 2s linear infinite; /* 障碍物移动动画 */
+        }
+        
+        @keyframes moveObstacle {
+            from { left: 100%; }
+            to { left: -30px; }
+        }
+        
+        #startButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #startButton:hover {
+            background-color: #45a049;
+        }
+
+        #score {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        #highScore {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #f44336; /* 红色字体显示 */
+        }
+    </style>
+</head>
+<body>
+    <button id="startButton">开始游戏</button>
+    <div id="score">得分：0</div>
+    <div id="highScore">历史最高分：0</div>
+    <div id="gameContainer">
+        <div id="dino"></div>
+    </div>
+
+    <script>
+        const dino = document.getElementById('dino');
+        const startButton = document.getElementById('startButton');
+        const scoreDisplay = document.getElementById('score');
+        const highScoreDisplay = document.getElementById('highScore');
+        const gameContainer = document.getElementById('gameContainer');
+
+        let score = 0; // 初始化得分
+        let highScore = 0; // 初始化历史最高分
+        let gameInterval = null; // 游戏循环定时器
+        let obstacles = []; // 存储障碍物
+        let obstacleMoving = false; // 标记障碍物是否在移动
+
+        startButton.addEventListener('click', startGame);
+        document.addEventListener('keydown', function(event) {
+            if (event.key === " ") {
+                jump();
+            }
+        });
+
+        function startGame() {
+            score = 0; // 重置得分
+            scoreDisplay.textContent = `得分：${score}`; // 更新得分显示
+            updateHighScore(); // 更新历史最高分显示
+            createObstacle(); // 创建第一个障碍物
+            if (!obstacleMoving) {
+                gameInterval = setInterval(moveObstacles, 20); // 开始移动障碍物
+                obstacleMoving = true;
+            }
+            startButton.style.display = 'none'; // 隐藏开始按钮
+        }
+
+        function createObstacle() {
+            const obstacle = document.createElement('div'); // 创建障碍物元素
+            obstacle.className = 'obstacle'; // 添加类名
+            obstacle.style.left = '100%'; // 初始位置在游戏容器右侧之外
+            gameContainer.appendChild(obstacle); // 将障碍物添加到游戏容器
+            obstacles.push(obstacle); // 将障碍物加入数组
+        }
+
+        function moveObstacles() {
+            for (let i = 0; i < obstacles.length; i++) {
+                let obstacle = obstacles[i];
+                let obstacleLeft = parseInt(window.getComputedStyle(obstacle).getPropertyValue("left"));
+
+                if (obstacleLeft > 0 && obstacleLeft < 20) {
+                    score++; // 每次成功跳过一个障碍物，得分加1
+                    scoreDisplay.textContent = `得分：${score}`; // 更新得分显示
+                    updateHighScore(); // 每次得分更新后，更新历史最高分显示
+                }
+
+                if (obstacleLeft <= -30) {
+                    obstacles.splice(i, 1); // 从数组中移除该障碍物
+                    obstacle.remove(); // 移除障碍物元素
+                    createObstacle(); // 创建新障碍物
+                } else {
+                    obstacle.style.left = `${obstacleLeft - 2}px`; // 移动障碍物
+                }
+
+                if (isCollision(dino, obstacle)) {
+                    clearInterval(gameInterval); // 停止游戏循环
+                    alert("游戏结束！你的得分：" + score); // 弹出游戏结束提示
+                    startButton.style.display = 'block'; // 显示开始按钮
+                    if (score > highScore) {
+                        highScore = score; // 更新历史最高分
+                        updateHighScore(); // 更新历史最高分显示
+                    }
+                    obstacles.forEach(ob => ob.remove()); // 移除所有障碍物
+                    obstacles = []; // 清空障碍物数组
+                    obstacleMoving = false; // 重置障碍物移动状态
+                    score = 0; // 重置得分
+                    break; // 结束循环
+                }
+            }
+        }
+
+        function isCollision(dino, obstacle) {
+            let dinoRect = dino.getBoundingClientRect(); // 获取小恐龙的边界信息
+            let obstacleRect = obstacle.getBoundingClientRect(); // 获取障碍物的边界信息
+
+            return !(
+                dinoRect.bottom < obstacleRect.top ||
+                dinoRect.top > obstacleRect.bottom ||
+                dinoRect.right < obstacleRect.left ||
+                dinoRect.left > obstacleRect.right
+            );
+        }
+
+        function jump() {
+            let dinoBottom = parseInt(window.getComputedStyle(dino).getPropertyValue("bottom")); // 获取小恐龙当前底部位置
+            if (dinoBottom === 0) { // 如果小恐龙在地面上
+                dino.style.bottom = '150px'; // 向上跳跃
+                setTimeout(function() {
+                    dino.style.bottom = '0'; // 落回地面
+                }, 400); // 跳跃动画时长
+            }
+        }
+
+        function updateHighScore() {
+            highScoreDisplay.textContent = `历史最高分：${highScore}`; // 更新历史最高分显示
+        }
+    </script>
+</body>
+</html>
